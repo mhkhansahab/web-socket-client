@@ -1,42 +1,27 @@
-import React, { useState, useEffect } from 'react';
-import io from 'socket.io-client';
-
-const socket = io('http://localhost:8080');
+import React, { useState, useEffect, useRef } from 'react';
+import './App.css';
+import Home from './components/home';
+import Chat from './components/chat';
 
 function App() {
-  const [isConnected, setIsConnected] = useState(socket.connected);
-  const [lastPong, setLastPong] = useState(null);
+  const ref = useRef();
+  const [name, setName]= useState('');
 
-  useEffect(() => {
-    socket.on('connect', () => {
-      setIsConnected(true);
-    });
-
-    socket.on('disconnect', () => {
-      setIsConnected(false);
-    });
-
-    socket.on('testing2', (data) => {
-      console.log(socket, data);
-      setLastPong(new Date().toISOString());
-    });
-
-    return () => {
-      socket.off('connect');
-      socket.off('disconnect');
-      socket.off('testing');
-    };
-  }, []);
-
-  const sendPing = () => {
-    socket.emit('testing', 'Hello, world!');
+  const handleNext = ()=>{
+    const value = ref.current?.value;
+    if(value !== ''){
+      setName(value);
+    }
   }
 
   return (
-    <div>
-      <p>Connected: { '' + isConnected }</p>
-      <p>Last pong: { lastPong || '-' }</p>
-      <button onClick={ sendPing }>Send ping</button>
+    <div className='container'>
+      {
+        name?.length === 0 ? 
+        (<Home onClick={handleNext} nameRef={ref}/>) 
+        : 
+        (<Chat name={name}/>)
+      }
     </div>
   );
 }
